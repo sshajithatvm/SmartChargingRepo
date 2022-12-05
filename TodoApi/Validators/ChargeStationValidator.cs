@@ -1,21 +1,20 @@
 ﻿using FluentValidation;
 
 namespace SmartChargingApi.Validators;
-public class ChargeStationValidator : AbstractValidator<ChargeStation>
+public class ChargeStationValidator : AbstractValidator<ChargeStationModel>
 {
 	public ChargeStationValidator()
 	{
         RuleFor(x => x.ChargeStationName).NotNull().NotEmpty();
-        //RuleForEach(x => x.Connectors).SetValidator(new ConnectorValidator()).When(m => m.Connectors.Count() > 0);
         RuleFor(x => x.Connectors)
           .Must(ValidateMaximumCurrentInAmps)
           .WithMessage("Group CapacityInAmps must be great or equal to the MaximumCurrentInAmps of the Connector of all Charge Stations");
         RuleFor(x => x.Connectors.Count()).GreaterThanOrEqualTo(1).LessThanOrEqualTo(5);
     }
-    private bool ValidateMaximumCurrentInAmps(ChargeStation chargeStation, List<Connector> newConnectors)
+    private bool ValidateMaximumCurrentInAmps(ChargeStationModel chargeStation, List<ConnectorModel> newConnectors)
     {
-        var group = chargeStation.Group;
-        var chargeStations = group.ChargeStations;
+        var group1 = chargeStation.Group;
+        var chargeStations = group1.ChargeStations.Where(x => x.ChargeStationId != chargeStation.ChargeStationId);
 
         var sumOfMaximumCurrent = (from chargeStation1 in chargeStations
                                    from connector1 in chargeStation1.Connectors
@@ -23,6 +22,6 @@ public class ChargeStationValidator : AbstractValidator<ChargeStation>
 
         var newSumOfMaximumCurrent = newConnectors.Sum(x => x.MaximumCurrentInAmps);
 
-        return group.CapacityInAmps >= (sumOfMaximumCurrent + newSumOfMaximumCurrent);
+        return group1.CapacityInAmps >= (sumOfMaximumCurrent + newSumOfMaximumCurrent);
     }
 }

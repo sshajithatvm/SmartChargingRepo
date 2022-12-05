@@ -6,7 +6,7 @@ public class ChargeStation
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int ChargeStationId { get; set; }
     public string ChargeStationName { get; set; }
-
+    public double MaximumCurrentInAllChargeStations { get; set; }
     public List<Connector> Connectors { get; set; } = new List<Connector>();
 
     public int GroupId { get; set; }

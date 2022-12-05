@@ -1,11 +1,8 @@
-using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using SmartChargingApi.Apis;
-using SmartChargingApi.Data;
 using SmartChargingApi.Repository;
 using SmartChargingApi.Validators;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,9 +33,9 @@ void RegisterServices(IServiceCollection services)
     services.AddTransient<ChargeStationApi>();
     services.AddTransient<ConnectorApi>();    
 
-    services.AddScoped<IValidator<Group>, GroupValidator>();
-    services.AddScoped<IValidator<ChargeStation>, ChargeStationValidator>();
-    services.AddScoped<IValidator<Connector>, ConnectorValidator>();
+    services.AddScoped<IValidator<GroupModel>, GroupValidator>();
+    services.AddScoped<IValidator<ChargeStationModel>, ChargeStationValidator>();
+    services.AddScoped<IValidator<ConnectorModel>, ConnectorValidator>();
 
     builder.Services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new() { Title = builder.Environment.ApplicationName, Version = "v1" }); });
 }

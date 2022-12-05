@@ -20,18 +20,18 @@ public class GroupApi
         app.MapDelete("/groups/{id}", DeleteGroup);
     }
 
-    public async Task<IResult> CreateGroup(IValidator<Group> validator, ISmartChargingRepository repository, GroupModel model)
+    public async Task<IResult> CreateGroup(IValidator<GroupModel> validator, ISmartChargingRepository repository, GroupModel model)
     {
         try
         {
             var newGroup = _mapper.Map<Group>(model);
 
-            var validationResult = await validator.ValidateAsync(newGroup);
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
             }
-            
+                        
             repository.Add(newGroup);
 
             if (await repository.SaveAll())
@@ -46,7 +46,7 @@ public class GroupApi
         }
         return Results.BadRequest("Failed to create group");
     }
-    public async Task<IResult> UpdateGroup(IValidator<Group> validator, ISmartChargingRepository repository, int id, GroupModel model)
+    public async Task<IResult> UpdateGroup(IValidator<GroupModel> validator, ISmartChargingRepository repository, int id, GroupModel model)
     {
         try
         {
@@ -58,11 +58,11 @@ public class GroupApi
 
             _mapper.Map(model, existingGroup);
 
-            var validationResult = await validator.ValidateAsync(existingGroup);
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
-            }
+            }                      
 
             repository.Update(existingGroup);
             if (await repository.SaveAll())

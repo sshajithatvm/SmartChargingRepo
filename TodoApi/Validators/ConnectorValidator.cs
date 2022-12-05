@@ -2,10 +2,10 @@
 
 namespace SmartChargingApi.Validators;
 
-public class ConnectorValidator : AbstractValidator<Connector>
+public class ConnectorValidator : AbstractValidator<ConnectorModel>
 {
     public ConnectorValidator()
-	{       
+	{    
 
         RuleFor(x => x.ConnectorId).InclusiveBetween(1,5);
         RuleFor(x => x.MaximumCurrentInAmps).GreaterThan(0);
@@ -15,16 +15,15 @@ public class ConnectorValidator : AbstractValidator<Connector>
           .WithMessage("Group CapacityInAmps must be great or equal to the MaximumCurrentInAmps of the Connector of all Charge Stations");       
     }
 
-    private bool ValidateMaximumCurrentInAmps(Connector connector, double newMaximumCurrentInAmps)
+    private bool ValidateMaximumCurrentInAmps(ConnectorModel connector, double newMaximumCurrentInAmps)
     {  
-        var group = connector.ChargeStation.Group;
-        var chargeStations = group.ChargeStations;
+        var group1 = connector.ChargeStation.Group;
 
-        var sumOfMaximumCurrent = (from chargeStation in chargeStations
-                                   from connector1 in chargeStation.Connectors//.SkipWhile(x=>x.ConnectorId == connector.ConnectorId)
+        var sumOfMaximumCurrent = (from chargeStation in group1.ChargeStations
+                                   from connector1 in chargeStation.Connectors.Where(x=>x.ConnectorId != connector.ConnectorId)
                                    select connector1.MaximumCurrentInAmps).Sum();
 
-        return group.CapacityInAmps >= (sumOfMaximumCurrent + newMaximumCurrentInAmps);
+        return group1.CapacityInAmps >= (sumOfMaximumCurrent + newMaximumCurrentInAmps);
     }
 
 }

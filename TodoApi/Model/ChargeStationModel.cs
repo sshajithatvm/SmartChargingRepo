@@ -12,4 +12,9 @@ public class ChargeStationModel
     public string ChargeStationName { get; set; }
 
     public List<ConnectorModel> Connectors { get; set; } = new List<ConnectorModel>();
+
+    [JsonIgnore]
+    public int ChargeStationId { get; set; }
+    [JsonIgnore]
+    public Group Group { get; set; }
 }

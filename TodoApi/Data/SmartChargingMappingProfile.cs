@@ -8,7 +8,8 @@ public class SmartChargingMappingProfile : Profile
         CreateMap<ConnectorModel, Connector>().ReverseMap();        
         CreateMap<ChargeStationModel, ChargeStation>().
             ForMember(dest => dest.Connectors, opt => opt.MapFrom(src => src.Connectors)).ReverseMap();
-        CreateMap<GroupModel, Group>().ReverseMap();       
+        CreateMap<GroupModel, Group>().
+            ForMember(dest => dest.ChargeStations, opt => opt.MapFrom(src => src.ChargeStations)).ReverseMap();
     }   
 }
 

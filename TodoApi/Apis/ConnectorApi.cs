@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using SmartChargingApi.Repository;
-using System.Text.RegularExpressions;
 
 namespace SmartChargingApi.Apis;
 
@@ -22,7 +21,7 @@ public class ConnectorApi
         app.MapDelete("/chargeStations/{chargeStationId}/connectors/{id}", DeleteConnector);
     }
 
-    public async Task<IResult> CreateConnector(IValidator<Connector> validator, ISmartChargingRepository repository, int chargeStationId, ConnectorModel model)
+    public async Task<IResult> CreateConnector(IValidator<ConnectorModel> validator, ISmartChargingRepository repository, int chargeStationId, ConnectorModel model)
     {
         try
         {
@@ -35,18 +34,18 @@ public class ConnectorApi
             }
             
             var existingGroup = await repository.GetItemAsync<Group>(x => x.GroupId == existingChargeStation.GroupId, new[] { "ChargeStations.Connectors" });
-            
-            var newConnector = _mapper.Map<Connector>(model);
-            newConnector.ConnectorId = FindMissingId(existingChargeStation);
-            existingChargeStation.Group = existingGroup;
-            newConnector.ChargeStation = existingChargeStation;
 
-            var validationResult = await validator.ValidateAsync(newConnector);
+            var newConnector = _mapper.Map<Connector>(model);
+
+            model.ConnectorId = FindMissingId(existingChargeStation);            
+            model.ChargeStation = existingChargeStation;
+            model.ChargeStation.Group = existingGroup;
+
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
             }
-            newConnector.ChargeStation = null;
 
             repository.Add(newConnector);
 
@@ -63,10 +62,11 @@ public class ConnectorApi
         return Results.BadRequest("Failed to create Connector");
     }   
 
-    public async Task<IResult> UpdateConnector(int id, IValidator<Connector> validator, ISmartChargingRepository repository, int chargeStationId, ConnectorModel model)
+    public async Task<IResult> UpdateConnector(IValidator<ConnectorModel> validator, ISmartChargingRepository repository, int chargeStationId, int id, ConnectorModel model)
     {
         try
         {
+            model.ConnectorId = id;
             model.ChargeStationId = chargeStationId;
             var existingConnector = await repository.GetItemAsync<Connector>(x => x.ConnectorId == id, new[] { "ChargeStation.Group" });
             if (existingConnector == null)
@@ -87,15 +87,15 @@ public class ConnectorApi
             var existingGroup = await repository.GetItemAsync<Group>(x => x.GroupId == existingChargeStation.GroupId, new[] { "ChargeStations.Connectors" });
 
             _mapper.Map(model, existingConnector);
-            existingChargeStation.Group = existingGroup;
-            existingConnector.ChargeStation = existingChargeStation;
+                        
+            model.ChargeStation = existingChargeStation;
+            model.ChargeStation.Group = existingGroup;
 
-            var validationResult = await validator.ValidateAsync(existingConnector);
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
             }
-            existingConnector.ChargeStation = null;
 
             repository.Update(existingConnector);
             if (await repository.SaveAll())

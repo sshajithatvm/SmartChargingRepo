@@ -10,4 +10,10 @@ public class ConnectorModel
     [JsonPropertyName("Maximum Current in Amps")]
     [DefaultValue(1)]
     public double MaximumCurrentInAmps { get; set; }
+
+    [JsonIgnore]
+    public int ConnectorId { get; set; }
+
+    [JsonIgnore]
+    public ChargeStation ChargeStation { get; set; }
 }

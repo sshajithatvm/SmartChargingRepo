@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 
 namespace SmartChargingApi.Validators;
-public class GroupValidator :AbstractValidator<Group>
+public class GroupValidator :AbstractValidator<GroupModel>
 {
     public GroupValidator()
     {
@@ -14,7 +14,7 @@ public class GroupValidator :AbstractValidator<Group>
         .WithMessage($"Group CapacityInAmps must be great or equal to the MaximumCurrentInAmps of the Connector of all Charge Stations");
     }
 
-    private bool ValidateGroupCapacityInAmps(Group group, double capacityInAmps)
+    private bool ValidateGroupCapacityInAmps(GroupModel group, double capacityInAmps)
     {
         var chargeStations = group.ChargeStations;
         var sumOfMaximumCurrent = (from chargeStation in chargeStations

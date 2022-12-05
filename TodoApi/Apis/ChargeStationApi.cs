@@ -22,7 +22,7 @@ public class ChargeStationApi
         app.MapGet("/groups/{groupId}/chargeStations/{id}", GetChargeStation).ExcludeFromDescription();
     }
 
-    public async Task<IResult> CreateChargeStation(IValidator<ChargeStation> validator, ISmartChargingRepository repository, int groupId, ChargeStationModel model)
+    public async Task<IResult> CreateChargeStation(IValidator<ChargeStationModel> validator, ISmartChargingRepository repository, int groupId, ChargeStationModel model)
     {
         try
         {
@@ -34,14 +34,13 @@ public class ChargeStationApi
             }
 
             var newChargeStation = _mapper.Map<ChargeStation>(model);
-            newChargeStation.Group = existingGroup;
+            model.Group = existingGroup;
 
-            var validationResult = await validator.ValidateAsync(newChargeStation);
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
             }
-            newChargeStation.Group = null;
 
             repository.Add(newChargeStation);
 
@@ -57,10 +56,11 @@ public class ChargeStationApi
         }
         return Results.BadRequest("Failed to create ChargeStation");
     }
-    public async Task<IResult> UpdateChargeStation(IValidator<ChargeStation> validator, ISmartChargingRepository repository, int id, int groupId, ChargeStationModel model)
+    public async Task<IResult> UpdateChargeStation(IValidator<ChargeStationModel> validator, ISmartChargingRepository repository, int id, int groupId, ChargeStationModel model)
     {
         try
         {
+            model.ChargeStationId= id;
             model.GroupId= groupId;
             var existingChargeStation = await repository.GetItemAsync<ChargeStation>(x => x.ChargeStationId == id, new[] { "Connectors" });
             if (existingChargeStation == null)
@@ -80,14 +80,13 @@ public class ChargeStationApi
             }
 
             _mapper.Map(model, existingChargeStation);
-            existingChargeStation.Group = existingGroup;
+            model.Group = existingGroup;
 
-            var validationResult = await validator.ValidateAsync(existingChargeStation);
+            var validationResult = await validator.ValidateAsync(model);
             if (!validationResult.IsValid)
             {
                 return Results.ValidationProblem(validationResult.ToDictionary());
             }
-            existingChargeStation.Group = null;
 
             repository.Update(existingChargeStation);
             if (await repository.SaveAll())
@@ -134,7 +133,6 @@ public class ChargeStationApi
         }
         return Results.BadRequest("Failed to deleting ChargeStation");
     }
-
     /// <summary>
     /// Added for testing purpose
     /// </summary>

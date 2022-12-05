@@ -1,8 +1,5 @@
-﻿using AutoMapper.Configuration.Annotations;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
-using System.Runtime.Serialization;
 
 public class GroupModel
 {
@@ -13,4 +10,7 @@ public class GroupModel
     [JsonPropertyName("Capacity in Amps")]
     [DefaultValue(1)]
     public double CapacityInAmps { get; set; }
+
+    [JsonIgnore]
+    public List<ChargeStationModel> ChargeStations { get; set; } = new List<ChargeStationModel>();
 }

@@ -68,7 +68,7 @@ public class ConnectorApiTests
 
         //Update a Connector with a ChargeStation
         var updatedModel = new ConnectorModel { MaximumCurrentInAmps = 4 };
-        var response1 = await client.PutAsJsonAsync($"/chargeStations/{1}/connectors/{1}", updatedModel);
+        var response1 = await client.PutAsJsonAsync($"/chargeStations/{1}/connectors/{2}", updatedModel);
         var returnValue1 = response1.Content.ReadFromJsonAsync<ConnectorModel>().Result;
         
         Assert.Equal(HttpStatusCode.OK, response1.StatusCode);

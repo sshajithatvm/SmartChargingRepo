@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 
 public class ChargeStationApiTests
 {
@@ -211,7 +204,7 @@ public class ChargeStationApiTests
         var client = application1.CreateClient();
 
         //Create a Group
-        var groupModel = new GroupModel { GroupName = "GroupName 1", CapacityInAmps = 4 };
+        var groupModel = new GroupModel { GroupName = "GroupName 1", CapacityInAmps = 5 };
         var groupResponse = await client.PostAsJsonAsync("/groups", groupModel);
         var groupValue = groupResponse.Content.ReadFromJsonAsync<GroupModel>().Result;
 
@@ -220,9 +213,14 @@ public class ChargeStationApiTests
         var chargeStationResponse = await client.PostAsJsonAsync($"/groups/{1}/chargeStations", chargeStationModel);
         Assert.Equal(HttpStatusCode.Created, chargeStationResponse.StatusCode);
 
-        //Update a ChargeStation 1 with a Group 1 (Connector MaximumCurrentInAmps 3)
+        //Create a ChargeStation 2 with a Group 1 (Connector MaximumCurrentInAmps 3)
         var chargeStationModel1 = new ChargeStationModel { GroupId = 1, ChargeStationName = "ChargeStationName 1", Connectors = { new ConnectorModel { MaximumCurrentInAmps = 3 } } };
-        var chargeStationResponse1 = await client.PutAsJsonAsync($"/groups/{1}/chargeStations/{1}", chargeStationModel1);
-        Assert.Equal(HttpStatusCode.BadRequest, chargeStationResponse1.StatusCode);
+        var chargeStationResponse1 = await client.PostAsJsonAsync($"/groups/{1}/chargeStations", chargeStationModel1);
+        Assert.Equal(HttpStatusCode.Created, chargeStationResponse1.StatusCode);
+
+        //Update a ChargeStation 1 with a Group 1 (Connector MaximumCurrentInAmps 1)
+        var chargeStationModel2 = new ChargeStationModel { GroupId = 1, ChargeStationName = "ChargeStationName 1", Connectors = { new ConnectorModel { MaximumCurrentInAmps = 2 } } };
+        var chargeStationResponse2 = await client.PutAsJsonAsync($"/groups/{1}/chargeStations/{2}", chargeStationModel2);
+        Assert.Equal(HttpStatusCode.OK, chargeStationResponse2.StatusCode);       
     }
 }
